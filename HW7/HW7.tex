@@ -1,0 +1,161 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+%\usepackage[textheight=8.5in, margin=1.6in]{geometry}
+\usepackage[total={6in,8in}]{geometry}
+
+%\usepackage{tikz}
+%\usepackage{pgfplots}
+%\tikzstyle{ball} = [circle,shading=ball, ball color=black,
+% minimum size=1mm,inner sep=1.3pt]
+
+%\usepackage{graphicx}
+
+\usepackage{enumitem}
+\usepackage{tikz}
+
+
+% \setlist[enumerate]{itemsep=2pt,leftmargin=*,label={(\alph*)}}
+
+%\usepackage[colorlinks=true,citecolor=black,linkcolor=black,urlcolor=blue]{hyperref}
+
+\newcommand{\comment}[1]{%
+ \text{\phantom{(#1)}} \tag{#1}
+}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\Z}{\mathbb{Z}}
+\newcommand{\Q}{\mathbb{Q}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\ve}{\varepsilon}
+\DeclareMathOperator{\tr}{tr}
+\DeclareMathOperator{\Span}{\mathrm{Span}}
+\DeclareMathOperator{\rk}{\mathrm{rank}}
+\DeclareMathOperator{\trace}{\mathrm{tr}}
+\DeclareMathOperator{\im}{\mathrm{im}}
+\DeclareMathOperator{\Sym}{\mathrm{Sym}}
+\DeclareMathOperator{\Hom}{\mathrm{Hom}}
+
+\newcounter{problem}
+\renewcommand \thesection {\theproblem}
+\newenvironment{prob}[1][]
+{
+\refstepcounter{problem}\par\medskip
+\def\myArg{#1}
+ \ifx\myArg\empty
+ \noindent \textsc{Problem~\theproblem.} \rmfamily
+ \else
+ \noindent \textsc{Problem~\theproblem\ (\textnormal{#1}).} \rmfamily
+ \fi
+}
+{
+\medskip
+
+}
+
+\parskip = 0.05in
+\parindent = 0.0in
+
+\pagestyle{empty}
+
+\begin{document}
+
+\usetikzlibrary{automata, positioning, arrows}
+\tikzset{
+ ->, % makes the edges directed
+ >=stealth, % makes the arrow heads bold
+ node distance=3cm, % specifies the minimum distance between two nodes. Change if n
+ every state/.style={thick, fill=gray!10}, % sets the properties for each ’state’ n
+ initial text=$ $, % sets the text that appears on the start arrow
+ }
+
+\centerline{MATH/CSCI 387 Homework 7}
+\centerline{Sima Nerush}
+\centerline{Discussed problems with Harrison and Riley}
+\bigskip
+
+\begin{prob}Show that any PSPACE-hard language is also NP-hard. (Remember that ``NP-hard'' requires the same thing as NP-completeness, except that the language does not have to be in NP. PSPACE-hard is defined similarly.)
+
+For a language $L_1$ to be NP-Hard requires that for all $A$ in NP, $A \le _p L_1$.
+
+For a language $L_2$ to be Pspace-hard requires that for all $A$ in Pspace, $A \le _p L_2$.
+
+\textbf{Proof:} Let $L \in$ PSPACE-hard. This implies that any $A \in$ PSPACE is no harder than $L$. Therefore, any $B \in$ NP is also no harder than $L$. This shows any $B \in$ NP can be reduced to $L$. Thus, $L$ is also NP-hard.
+\end{prob}
+
+\pagebreak
+
+\begin{prob} The game Gomoku is played by two players on an n × n board. The players alternate placing pieces, with one placing red and the other placing blue. (The pieces must be placed on open spaces.) The winner is the first player to achieve a line of 5 consecutive markers (in a row, column, or diagonal). A position consists of a description of what stones are on the board and whose turn it is. Let $GOMOKU$ be the set of positions from which red can force a win. Show that $GOMOKU \in PSPACE$.
+
+Formulated as a language:
+
+$GOMOKU = \{ p\ | \ p \text{ is a position where red can force a win} \}$
+
+Define a PSPACE algorithm $M$ for $GOMOKU$:
+
+\begin{enumerate}
+
+    \item Get a position as an input.
+    \item If it is a leaf and a winning position of Red, accept.
+    \item If it is a leaf and a winning position for Blue, reject.
+    \item If It is Red's turn:
+    \begin{enumerate}
+        \item[1.] Make a recursive call of $M$ on the position corresponding to all possible next turns.
+        \item[2.] Erase the contents of the tape, storing only the results of the recursive calls.
+        \item[3.] If one of them accepts, accept. Else, reject.
+    \end{enumerate}
+    \item If It is Blue's turn:
+    \begin{enumerate}
+        \item[1.] Make a recursive call of $M$ on the position corresponding to all possible next turns.
+        \item[2.] Erase the contents of the tape, storing only the results of the recursive calls.
+        \item[3.] If all of them accept, accept. Else, reject.
+    \end{enumerate}
+
+
+\end{enumerate}
+
+\textbf{Analysis:}
+
+Recursion can have at most $n^2$ depth, because at every turn it takes at most $n^2$ subsequent turns to fill up the board.
+
+Each level of recursion adds $O(n^2)$ characters to the tape because it takes $O(n^2)$ symbols to represent a board.
+
+It also takes $O(n^2)$ time to check whether a board position is a win. (This implies that the check can also be done in polynomial space).
+
+
+
+\end{prob}
+
+\pagebreak
+
+\begin{prob} Show that $PSPACE$ is closed under the star operation.
+
+Given a string and a polynomial time decider for $L$, we want to determine whether our string is in $L^*$.
+
+Define an algorithm $M$ for $L^*$:
+
+\begin{enumerate}
+    \item Get a string as input:
+
+    \item If $s \in L$, return true.
+    \item for every possible splitting into parts $l$ and $r$ of s:
+    \begin{enumerate}
+        \item[1.] Recursively call $M$ on part $l$ of the string. If it accepts, erase the calculations on the tape and recursively call $M$ on part $r$ of the string. If it accepts, accept.
+        \item[2.] Erase the calculations on the tape. 
+        \item[3.] reject.
+
+    \end{enumerate}
+\end{enumerate}
+
+\textbf{Analysis:}
+
+Recursion can have at most $n$ depth, because there are n characters in the input string, and we cannot split beyond this point.
+
+Each level of recursion adds some polynomial number of characters to the tape because we have a polynomial space decider for $L$.
+
+\end{prob}
+
+\end{document}
